@@ -428,7 +428,6 @@ private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
                 val state = repository.load()
                 val updated = if (saved) state.savedStories - story.title else state.savedStories + story.title
                 repository.save(state.copy(savedStories = updated))
-                savedTitles = updated
                 saved = !saved
             }) {
                 Text(if (saved) "Saved ✓" else "Save story")
