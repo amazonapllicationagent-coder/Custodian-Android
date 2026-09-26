@@ -286,7 +286,7 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
     var searchQuery by remember { mutableStateOf("") }
     var showCreate by remember { mutableStateOf(false) }
     var savedOnly by remember { mutableStateOf(false) }
-    val savedTitles = repository.load().savedStories
+    var savedTitles by remember { mutableStateOf(repository.load().savedStories) }
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("Community") }
     var summary by remember { mutableStateOf("") }
@@ -370,6 +370,7 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
                         val state = repository.load()
                         repository.save(state.copy(userStories = state.userStories + json))
                         userStories = userStories + story
+                        savedTitles = repository.load().savedStories
                         title = ""
                         category = "Community"
                         summary = ""
@@ -427,6 +428,7 @@ private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
                 val state = repository.load()
                 val updated = if (saved) state.savedStories - story.title else state.savedStories + story.title
                 repository.save(state.copy(savedStories = updated))
+                savedTitles = updated
                 saved = !saved
             }) {
                 Text(if (saved) "Saved ✓" else "Save story")
