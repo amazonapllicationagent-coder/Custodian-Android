@@ -345,7 +345,8 @@ private fun SafetyScreen(onBack: () -> Unit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = {
                         val timestamp = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date())
-                        state = state.copy(lastCheckIn = timestamp)
+                        val history = (listOf(timestamp) + state.checkInHistory).distinct().take(10)
+                        state = state.copy(lastCheckIn = timestamp, checkInHistory = history)
                         repository.save(state)
                     }) { Text("I am Safe") }
                     if (state.lastCheckIn.isNotBlank()) {
@@ -363,6 +364,19 @@ private fun SafetyScreen(onBack: () -> Unit) {
         }
 
         Spacer(Modifier.height(16.dp))
+
+        if (state.checkInHistory.isNotEmpty()) {
+            Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+                Column(Modifier.padding(16.dp)) {
+                    Text("Check-In History", style = MaterialTheme.typography.titleLarge)
+                    Spacer(Modifier.height(6.dp))
+                    state.checkInHistory.take(5).forEach { entry ->
+                        Text("• $entry", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
 
         Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
             Column(Modifier.padding(16.dp)) {
