@@ -20,6 +20,20 @@ import androidx.compose.ui.unit.dp
 
 private data class Story(val title: String, val category: String, val summary: String, val body: String)
 
+private fun decodeStory(value: String): Story? {
+    return try {
+        val json = org.json.JSONObject(value)
+        Story(
+            json.getString("title"),
+            json.getString("category"),
+            json.getString("summary"),
+            json.getString("body")
+        )
+    } catch (_: Exception) {
+        null
+    }
+}
+
 private val stories = listOf(
     Story("The Village Elder", "Culture", "A community story about wisdom, responsibility, and protecting tradition.", "At the heart of the village stood an elder who believed that knowledge was strongest when it was shared. Families gathered to listen, ask questions, and remember the lessons of those who came before them."),
     Story("The Lost Path", "Community", "A family discovers why listening to elders can prevent a difficult journey.", "A young family set out on an unfamiliar path and soon realized that the road was difficult. An older relative remembered a safer route and guided them back. The experience taught the family the value of patience, experience, and communication."),
