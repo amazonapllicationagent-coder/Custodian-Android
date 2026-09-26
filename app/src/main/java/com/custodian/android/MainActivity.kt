@@ -143,11 +143,12 @@ private fun CustodianApp() {
                     "stories" -> StoriesScreen({ screen = "home" }) { story -> selectedStory = story; screen = "storyDetail" }
                     "storyDetail" -> StoryDetailScreen(selectedStory) { screen = "stories" }
                     "safety" -> SafetyScreen { screen = "home" }
+                    "settings" -> SettingsScreen(profileState) { screen = "home" }
                     "profile" -> ProfileScreen(profileState, { name, about ->
                         profileState = profileState.copy(profileName = name, profileAbout = about)
                         repository.save(profileState)
                     }) { screen = "home" }
-                    else -> HomeScreen({ screen = "stories" }, { screen = "safety" })
+                    else -> HomeScreen(profileState, { screen = "stories" }, { screen = "safety" }, { screen = "settings" })
                 }
             }
         }
@@ -155,10 +156,12 @@ private fun CustodianApp() {
 }
 
 @Composable
-private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
+private fun HomeScreen(state: SafetyState, onStories: () -> Unit, onSafety: () -> Unit, onSettings: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("CUSTODIAN", style = MaterialTheme.typography.headlineLarge)
         Text("Our stories. Our wisdom. Our future.")
+        Spacer(Modifier.height(8.dp))
+        Text(if (state.lastCheckIn.isBlank()) "Safety check-in: Not completed yet" else "Safety check-in: " + state.lastCheckIn, style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(20.dp))
 
         Card(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp)) {
@@ -166,6 +169,22 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
                 Text("Welcome home", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(6.dp))
                 Text("Your place for community stories, cultural knowledge, and family safety.")
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Safety overview", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                Text(state.completedSteps.size.toString() + " of 4 safety checklist steps completed")
+                Text(if (state.safetyMeetingPlace.isBlank()) "Safety plan: Not set up" else "Meeting place: " + state.safetyMeetingPlace)
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onSafety) { Text("Open safety") }
+                    OutlinedButton(onClick = onSettings) { Text("Settings") }
+                }
             }
         }
 
