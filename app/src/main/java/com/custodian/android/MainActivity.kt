@@ -350,10 +350,10 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
             title = { Text("Create Community Story") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(title, { title = it }, label = { Text("Title") }, singleLine = true)
-                    OutlinedTextField(category, { category = it }, label = { Text("Category") }, singleLine = true)
-                    OutlinedTextField(summary, { summary = it }, label = { Text("Short summary") })
-                    OutlinedTextField(body, { body = it }, label = { Text("Story") }, minLines = 4)
+                    OutlinedTextField(title, { title = it.take(80) }, label = { Text("Title") }, singleLine = true)
+                    OutlinedTextField(category, { category = it.take(40) }, label = { Text("Category") }, singleLine = true)
+                    OutlinedTextField(summary, { summary = it.take(240) }, label = { Text("Short summary") })
+                    OutlinedTextField(body, { body = it.take(5000) }, label = { Text("Story") }, minLines = 4)
                 }
             },
             confirmButton = {
