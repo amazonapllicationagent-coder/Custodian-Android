@@ -162,18 +162,34 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
     val allStories = stories + userStories
     val categories = listOf("All") + allStories.map { it.category }.distinct()
     var selectedCategory by remember { mutableStateOf("All") }
+    var searchQuery by remember { mutableStateOf("") }
     var showCreate by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("Community") }
     var summary by remember { mutableStateOf("") }
     var body by remember { mutableStateOf("") }
-    val filteredStories = if (selectedCategory == "All") allStories else allStories.filter { it.category == selectedCategory }
+    val filteredStories = allStories.filter { story ->
+        val matchesCategory = selectedCategory == "All" || story.category == selectedCategory
+        val query = searchQuery.trim()
+        val matchesSearch = query.isBlank() || listOf(story.title, story.category, story.summary, story.body)
+            .any { it.contains(query, ignoreCase = true) }
+        matchesCategory && matchesSearch
+    }
 
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Community Stories", style = MaterialTheme.typography.headlineMedium)
         Text("Explore and preserve community knowledge.")
         Spacer(Modifier.height(12.dp))
         Button(onClick = { showCreate = true }) { Text("Create a story") }
+        Spacer(Modifier.height(10.dp))
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("Search stories") },
+            placeholder = { Text("Title, category, or keyword") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             categories.forEach { current ->
@@ -356,8 +372,16 @@ private fun SafetyScreen(onBack: () -> Unit) {
                             val phone = Uri.encode(state.emergencyContactPhone)
                             context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
                         }) { Text("Call") }
-                        OutlinedButton(onClick = { showContactForm = true }) { Text("Edit") }
+                        OutlinedButton(onClick = {
+                            val phone = Uri.encode(state.emergencyContactPhone)
+                            val message = Uri.encode("Custodian emergency alert: I need help. Please contact me as soon as possible.")
+                            context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$phone")).apply {
+                                putExtra("sms_body", message)
+                            })
+                        }) { Text("Emergency SMS") }
                     }
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(onClick = { showContactForm = true }) { Text("Edit contact") }
                 }
             }
         }
