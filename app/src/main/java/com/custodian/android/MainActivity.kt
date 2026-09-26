@@ -398,9 +398,9 @@ private fun ProfileScreen(state: SafetyState, onSave: (String, String) -> Unit, 
             }
         }
         Spacer(Modifier.height(16.dp))
-        OutlinedTextField(name, { name = it }, label = { Text("Your name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(name, { name = it.take(60) }, label = { Text("Your name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         Spacer(Modifier.height(10.dp))
-        OutlinedTextField(about, { about = it }, label = { Text("About you") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
+        OutlinedTextField(about, { about = it.take(300) }, label = { Text("About you") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
         Spacer(Modifier.height(16.dp))
         Button(onClick = { onSave(name.trim(), about.trim()) }, modifier = Modifier.fillMaxWidth()) { Text("Save profile") }
         Spacer(Modifier.height(8.dp))
