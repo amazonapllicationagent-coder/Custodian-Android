@@ -2,7 +2,6 @@ package com.custodian.android
 
 import android.content.Context
 import org.json.JSONArray
-import org.json.JSONObject
 
 data class SafetyState(
     val completedSteps: Set<Int> = emptySet(),
@@ -23,8 +22,14 @@ class SafetyRepository(context: Context) {
 
     fun load(): SafetyState {
         val completed = mutableSetOf<Int>()
-        val array = JSONArray(preferences.getString("completed_steps", "[]"))
-        for (i in 0 until array.length()) completed += array.getInt(i)
+        val array = try {
+            JSONArray(preferences.getString("completed_steps", "[]"))
+        } catch (_: Exception) {
+            JSONArray()
+        }
+        for (i in 0 until array.length()) {
+            try { completed += array.getInt(i) } catch (_: Exception) { }
+        }
 
         return SafetyState(
             completedSteps = completed,
@@ -62,12 +67,20 @@ class SafetyRepository(context: Context) {
             .apply()
     }
     private fun loadCheckInHistory(): List<String> {
-        val array = JSONArray(preferences.getString("check_in_history", "[]"))
-        return List(array.length()) { array.getString(it) }
+        val array = try { JSONArray(preferences.getString("check_in_history", "[]")) } catch (_: Exception) { JSONArray() }
+        return buildList {
+            for (i in 0 until array.length()) {
+                try { add(array.getString(i)) } catch (_: Exception) { }
+            }
+        }
     }
 
     private fun loadUserStories(): List<String> {
-        val array = JSONArray(preferences.getString("user_stories", "[]"))
-        return List(array.length()) { array.getString(it) }
+        val array = try { JSONArray(preferences.getString("user_stories", "[]")) } catch (_: Exception) { JSONArray() }
+        return buildList {
+            for (i in 0 until array.length()) {
+                try { add(array.getString(i)) } catch (_: Exception) { }
+            }
+        }
     }
 }
