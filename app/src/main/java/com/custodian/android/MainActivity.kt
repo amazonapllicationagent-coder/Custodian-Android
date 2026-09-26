@@ -1,9 +1,16 @@
 package com.custodian.android
 
+import android.Manifest
+import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import androidx.activity.ComponentActivity
@@ -39,6 +46,40 @@ private val stories = listOf(
     Story("The Lost Path", "Community", "A family discovers why listening to elders can prevent a difficult journey.", "A young family set out on an unfamiliar path and soon realized that the road was difficult. An older relative remembered a safer route and guided them back. The experience taught the family the value of patience, experience, and communication."),
     Story("Our Heritage", "Tradition", "A simple introduction to preserving language, customs, and family history.", "Young people began recording the words, songs, recipes, and memories shared by their grandparents. They discovered that heritage can be carried forward through everyday conversations and respectful storytelling.")
 )
+
+
+private const val CHECK_IN_REMINDER_REQUEST = 4101
+
+private fun setCheckInReminder(context: Context, enabled: Boolean) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, CheckInReminderReceiver::class.java)
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        CHECK_IN_REMINDER_REQUEST,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    if (!enabled) {
+        alarmManager.cancel(pendingIntent)
+        return
+    }
+
+    val calendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 20)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+        if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DAY_OF_YEAR, 1)
+    }
+
+    alarmManager.setInexactRepeating(
+        AlarmManager.RTC_WAKEUP,
+        calendar.timeInMillis,
+        AlarmManager.INTERVAL_DAY,
+        pendingIntent
+    )
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,6 +205,8 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
     var selectedCategory by remember { mutableStateOf("All") }
     var searchQuery by remember { mutableStateOf("") }
     var showCreate by remember { mutableStateOf(false) }
+    var savedOnly by remember { mutableStateOf(false) }
+    val savedTitles = remember { repository.load().savedStories }
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("Community") }
     var summary by remember { mutableStateOf("") }
@@ -173,14 +216,20 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
         val query = searchQuery.trim()
         val matchesSearch = query.isBlank() || listOf(story.title, story.category, story.summary, story.body)
             .any { it.contains(query, ignoreCase = true) }
-        matchesCategory && matchesSearch
+        val matchesSaved = !savedOnly || story.title in savedTitles
+        matchesCategory && matchesSearch && matchesSaved
     }
 
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Community Stories", style = MaterialTheme.typography.headlineMedium)
         Text("Explore and preserve community knowledge.")
         Spacer(Modifier.height(12.dp))
-        Button(onClick = { showCreate = true }) { Text("Create a story") }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { showCreate = true }) { Text("Create a story") }
+            OutlinedButton(onClick = { savedOnly = !savedOnly }) {
+                Text(if (savedOnly) "All stories" else "Saved stories")
+            }
+        }
         Spacer(Modifier.height(10.dp))
         OutlinedTextField(
             value = searchQuery,
@@ -334,6 +383,27 @@ private fun SafetyScreen(onBack: () -> Unit) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(6.dp))
         Text("Your safety information is stored locally on this device.")
+        Spacer(Modifier.height(12.dp))
+
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Daily Check-In Reminder", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(4.dp))
+                Text("Get a daily reminder at 8:00 PM to confirm that you are safe.")
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(if (state.reminderEnabled) "Reminder is on" else "Reminder is off")
+                    Switch(checked = state.reminderEnabled, onCheckedChange = { enabled ->
+                        if (enabled && Build.VERSION.SDK_INT >= 33) {
+                            (context as? Activity)?.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 4102)
+                        }
+                        state = state.copy(reminderEnabled = enabled)
+                        repository.save(state)
+                        setCheckInReminder(context, enabled)
+                    })
+                }
+            }
+        }
         Spacer(Modifier.height(16.dp))
 
         Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
