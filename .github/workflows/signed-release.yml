@@ -42,8 +42,20 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.CUSTODIAN_KEYSTORE_BASE64 }}
         run: |
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/custodian-signing.keystore"
+          printf '%s' "$KEYSTORE_BASE64" |
+            tr -d '[:space:]' |
+            base64 --decode > "$RUNNER_TEMP/custodian-signing.keystore"
+          test -s "$RUNNER_TEMP/custodian-signing.keystore" || {
+            echo "Keystore decode produced an empty file"
+            exit 1
+          }
           chmod 600 "$RUNNER_TEMP/custodian-signing.keystore"
+
+      - name: Validate keystore
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.CUSTODIAN_KEYSTORE_PASSWORD }}
+        run: |
+          keytool -list -keystore "$RUNNER_TEMP/custodian-signing.keystore"             -storepass "$KEYSTORE_PASSWORD" >/dev/null
 
       - name: Run unit tests
         run: gradle test
@@ -54,11 +66,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.CUSTODIAN_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.CUSTODIAN_KEY_PASSWORD }}
         run: |
-          gradle assembleRelease \
-            -PCUSTODIAN_STORE_FILE="$RUNNER_TEMP/custodian-signing.keystore" \
-            -PCUSTODIAN_STORE_PASSWORD="$KEYSTORE_PASSWORD" \
-            -PCUSTODIAN_KEY_ALIAS="$KEY_ALIAS" \
-            -PCUSTODIAN_KEY_PASSWORD="$KEY_PASSWORD"
+          gradle assembleRelease             -PCUSTODIAN_STORE_FILE="$RUNNER_TEMP/custodian-signing.keystore"             -PCUSTODIAN_STORE_PASSWORD="$KEYSTORE_PASSWORD"             -PCUSTODIAN_KEY_ALIAS="$KEY_ALIAS"             -PCUSTODIAN_KEY_PASSWORD="$KEY_PASSWORD"
 
       - name: Verify APK signature
         run: |
