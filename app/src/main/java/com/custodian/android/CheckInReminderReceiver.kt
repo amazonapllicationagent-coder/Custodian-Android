@@ -22,7 +22,12 @@ class CheckInReminderReceiver : BroadcastReceiver() {
             )
         }
 
-        val notification = Notification.Builder(context, channelId)
+        val notificationBuilder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(context, channelId)
+        } else {
+            Notification.Builder(context)
+        }
+        val notification = notificationBuilder
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("Custodian check-in")
             .setContentText("Take a moment to confirm that you are safe.")
