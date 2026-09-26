@@ -3,6 +3,9 @@ package com.custodian.android
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -123,6 +126,34 @@ private fun SafetyScreen(onBack: () -> Unit) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(6.dp))
         Text("Your safety information is stored locally on this device.")
+        Spacer(Modifier.height(16.dp))
+
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Safety Check-In", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                Text(if (state.lastCheckIn.isBlank()) "Let your trusted people know you are safe." else "Last check-in: ${state.lastCheckIn}")
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = {
+                        val timestamp = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date())
+                        state = state.copy(lastCheckIn = timestamp)
+                        repository.save(state)
+                    }) { Text("I am Safe") }
+                    if (state.lastCheckIn.isNotBlank()) {
+                        OutlinedButton(onClick = {
+                            val message = "Custodian safety check-in: I am safe. Last checked in at ${state.lastCheckIn}."
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, message)
+                            }
+                            context.startActivity(Intent.createChooser(intent, "Share check-in"))
+                        }) { Text("Share") }
+                    }
+                }
+            }
+        }
+
         Spacer(Modifier.height(16.dp))
 
         Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
