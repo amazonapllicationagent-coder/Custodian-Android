@@ -12,6 +12,9 @@ data class SafetyState(
     val checkInHistory: List<String> = emptyList(),
     val savedStories: Set<String> = emptySet(),
     val reminderEnabled: Boolean = false,
+    val safetyMeetingPlace: String = "",
+    val safetyBackupContact: String = "",
+    val safetyNotes: String = "",
     val profileName: String = "", val profileAbout: String = "", val userStories: List<String> = emptyList()
 )
 
@@ -31,6 +34,9 @@ class SafetyRepository(context: Context) {
             checkInHistory = loadCheckInHistory(),
             savedStories = preferences.getStringSet("saved_stories", emptySet()) ?: emptySet(),
             reminderEnabled = preferences.getBoolean("reminder_enabled", false),
+            safetyMeetingPlace = preferences.getString("safety_meeting_place", "") ?: "",
+            safetyBackupContact = preferences.getString("safety_backup_contact", "") ?: "",
+            safetyNotes = preferences.getString("safety_notes", "") ?: "",
             profileName = preferences.getString("profile_name", "") ?: "", profileAbout = preferences.getString("profile_about", "") ?: "", userStories = loadUserStories()
         )
     }
@@ -47,6 +53,9 @@ class SafetyRepository(context: Context) {
             .putString("check_in_history", JSONArray(state.checkInHistory).toString())
             .putStringSet("saved_stories", state.savedStories)
             .putBoolean("reminder_enabled", state.reminderEnabled)
+            .putString("safety_meeting_place", state.safetyMeetingPlace)
+            .putString("safety_backup_contact", state.safetyBackupContact)
+            .putString("safety_notes", state.safetyNotes)
             .putString("profile_name", state.profileName)
             .putString("profile_about", state.profileAbout)
             .putString("user_stories", JSONArray(state.userStories).toString())
