@@ -224,6 +224,51 @@ private fun HomeScreen(state: SafetyState, onStories: () -> Unit, onSafety: () -
 }
 
 @Composable
+private fun SettingsScreen(state: SafetyState, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val repository = remember(context) { SafetyRepository(context) }
+    var reminderEnabled by remember { mutableStateOf(state.reminderEnabled) }
+
+    Column(Modifier.fillMaxSize().padding(20.dp)) {
+        Text("Settings", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(16.dp))
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Notifications", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                Text("Daily safety reminder at 8:00 PM")
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(if (reminderEnabled) "Enabled" else "Disabled")
+                    Switch(checked = reminderEnabled, onCheckedChange = { enabled ->
+                        if (enabled && Build.VERSION.SDK_INT >= 33) {
+                            (context as? Activity)?.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 4102)
+                        }
+                        reminderEnabled = enabled
+                        val updated = repository.load().copy(reminderEnabled = enabled)
+                        repository.save(updated)
+                        setCheckInReminder(context, enabled)
+                    })
+                }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text("About Custodian", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                Text("Community stories, cultural knowledge, and family safety.")
+                Spacer(Modifier.height(4.dp))
+                Text("Version 0.2.0", style = MaterialTheme.typography.labelMedium)
+                Text("Safety information is stored locally on this device.", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Back") }
+    }
+}
+
+@Composable
 private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
     val context = LocalContext.current
     val repository = remember(context) { SafetyRepository(context) }
