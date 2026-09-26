@@ -293,13 +293,22 @@ private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Text(story.body, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(24.dp))
-        Button(onClick = {
-            val state = repository.load()
-            val updated = if (saved) state.savedStories - story.title else state.savedStories + story.title
-            repository.save(state.copy(savedStories = updated))
-            saved = !saved
-        }) {
-            Text(if (saved) "Saved ✓" else "Save story")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = {
+                val state = repository.load()
+                val updated = if (saved) state.savedStories - story.title else state.savedStories + story.title
+                repository.save(state.copy(savedStories = updated))
+                saved = !saved
+            }) {
+                Text(if (saved) "Saved ✓" else "Save story")
+            }
+            OutlinedButton(onClick = {
+                val message = story.title + "\n\n" + story.summary + "\n\n" + story.body
+                context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, message)
+                }, "Share story"))
+            }) { Text("Share") }
         }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = onBack) { Text("Back to stories") }
