@@ -96,7 +96,16 @@ private fun CustodianApp() {
     val repository = remember(context) { SafetyRepository(context) }
     var profileState by remember { mutableStateOf(repository.load()) }
 
-    MaterialTheme {
+    val custodianColors = lightColorScheme(
+        primary = androidx.compose.ui.graphics.Color(0xFF1B5E20),
+        onPrimary = androidx.compose.ui.graphics.Color.White,
+        secondary = androidx.compose.ui.graphics.Color(0xFF8D6E63),
+        tertiary = androidx.compose.ui.graphics.Color(0xFFFFA000),
+        background = androidx.compose.ui.graphics.Color(0xFFF7F5EF),
+        surface = androidx.compose.ui.graphics.Color(0xFFFFFBF5)
+    )
+
+    MaterialTheme(colorScheme = custodianColors) {
         Scaffold(
             bottomBar = {
                 if (screen != "storyDetail") {
