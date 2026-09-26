@@ -11,7 +11,7 @@ import android.os.Build
 
 class CheckInReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        val channelId = "custodian_checkin"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&\n            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED\n        ) {\n            return\n        }\n\n        val channelId = "custodian_checkin"
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             manager.createNotificationChannel(
