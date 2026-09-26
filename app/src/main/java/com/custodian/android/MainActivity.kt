@@ -387,6 +387,9 @@ private fun SafetyScreen(onBack: () -> Unit) {
     var showContactForm by remember { mutableStateOf(false) }
     var contactName by remember { mutableStateOf(state.emergencyContactName) }
     var contactPhone by remember { mutableStateOf(state.emergencyContactPhone) }
+    var meetingPlace by remember { mutableStateOf(state.safetyMeetingPlace) }
+    var backupContact by remember { mutableStateOf(state.safetyBackupContact) }
+    var safetyNotes by remember { mutableStateOf(state.safetyNotes) }
 
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
@@ -439,6 +442,25 @@ private fun SafetyScreen(onBack: () -> Unit) {
                         }) { Text("Share") }
                     }
                 }
+            }
+        }
+
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Family Safety Plan", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                Text("Keep a simple plan for meeting up and sharing important instructions.")
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(meetingPlace, { meetingPlace = it }, label = { Text("Family meeting place") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(backupContact, { backupContact = it }, label = { Text("Backup contact") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(safetyNotes, { safetyNotes = it }, label = { Text("Emergency notes") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
+                Spacer(Modifier.height(10.dp))
+                Button(onClick = {
+                    state = state.copy(safetyMeetingPlace = meetingPlace.trim(), safetyBackupContact = backupContact.trim(), safetyNotes = safetyNotes.trim())
+                    repository.save(state)
+                }) { Text("Save safety plan") }
             }
         }
 
