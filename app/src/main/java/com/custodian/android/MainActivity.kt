@@ -140,7 +140,8 @@ private fun StoryDetailScreen(onBack: () -> Unit) {
 
 @Composable
 private fun SafetyScreen(onBack: () -> Unit) {
-    val repository = remember { SafetyRepository(LocalContext.current) }
+    val context = LocalContext.current
+    val repository = remember(context) { SafetyRepository(context) }
     var state by remember { mutableStateOf(repository.load()) }
     val checklist = listOf(
         "Keep important family contacts available",
