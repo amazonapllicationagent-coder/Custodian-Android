@@ -53,11 +53,20 @@ jobs:
           }
           chmod 600 "$RUNNER_TEMP/custodian-signing.keystore"
 
-      - name: Validate keystore
+      - name: Validate keystore and select password
         env:
           KEYSTORE_PASSWORD: ${{ secrets.CUSTODIAN_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.CUSTODIAN_KEY_PASSWORD }}
         run: |
-          keytool -list -keystore "$RUNNER_TEMP/custodian-signing.keystore" -storepass "$KEYSTORE_PASSWORD" >/dev/null
+          if keytool -list -keystore "$RUNNER_TEMP/custodian-signing.keystore" -storepass "$KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+            printf 'CUSTODIAN_EFFECTIVE_STORE_PASSWORD=%s\n' "$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          elif keytool -list -keystore "$RUNNER_TEMP/custodian-signing.keystore" -storepass "$KEY_PASSWORD" >/dev/null 2>&1; then
+            echo "Store password secret differs from the keystore password; using the key password as the store password."
+            printf 'CUSTODIAN_EFFECTIVE_STORE_PASSWORD=%s\n' "$KEY_PASSWORD" >> "$GITHUB_ENV"
+          else
+            echo "The decoded keystore is valid data, but neither configured password can open it."
+            exit 1
+          fi
 
       - name: Run unit tests
         run: gradle test
@@ -68,7 +77,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.CUSTODIAN_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.CUSTODIAN_KEY_PASSWORD }}
         run: |
-          gradle assembleRelease             -PCUSTODIAN_STORE_FILE="$RUNNER_TEMP/custodian-signing.keystore"             -PCUSTODIAN_STORE_PASSWORD="$KEYSTORE_PASSWORD"             -PCUSTODIAN_KEY_ALIAS="$KEY_ALIAS"             -PCUSTODIAN_KEY_PASSWORD="$KEY_PASSWORD"
+          gradle assembleRelease             -PCUSTODIAN_STORE_FILE="$RUNNER_TEMP/custodian-signing.keystore"             -PCUSTODIAN_STORE_PASSWORD="$CUSTODIAN_EFFECTIVE_STORE_PASSWORD"             -PCUSTODIAN_KEY_ALIAS="$KEY_ALIAS"             -PCUSTODIAN_KEY_PASSWORD="$KEY_PASSWORD"
 
       - name: Verify APK signature
         run: |
