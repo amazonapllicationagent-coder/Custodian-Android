@@ -8,7 +8,8 @@ data class SafetyState(
     val completedSteps: Set<Int> = emptySet(),
     val emergencyContactName: String = "",
     val emergencyContactPhone: String = "",
-    val lastCheckIn: String = ""
+    val lastCheckIn: String = "",
+    val savedStories: Set<String> = emptySet()
 )
 
 class SafetyRepository(context: Context) {
@@ -23,7 +24,8 @@ class SafetyRepository(context: Context) {
             completedSteps = completed,
             emergencyContactName = preferences.getString("contact_name", "") ?: "",
             emergencyContactPhone = preferences.getString("contact_phone", "") ?: "",
-            lastCheckIn = preferences.getString("last_check_in", "") ?: ""
+            lastCheckIn = preferences.getString("last_check_in", "") ?: "",
+            savedStories = preferences.getStringSet("saved_stories", emptySet()) ?: emptySet()
         )
     }
 
@@ -36,6 +38,7 @@ class SafetyRepository(context: Context) {
             .putString("contact_name", state.emergencyContactName)
             .putString("contact_phone", state.emergencyContactPhone)
             .putString("last_check_in", state.lastCheckIn)
+            .putStringSet("saved_stories", state.savedStories)
             .apply()
     }
 }
