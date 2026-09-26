@@ -1,5 +1,7 @@
 package com.custodian.android
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -112,11 +114,62 @@ private fun SafetyScreen(onBack: () -> Unit) {
         "Check that children know who they can ask for help"
     )
 
+    var showContactForm by remember { mutableStateOf(false) }
+    var contactName by remember { mutableStateOf(state.emergencyContactName) }
+    var contactPhone by remember { mutableStateOf(state.emergencyContactPhone) }
+    val context = LocalContext.current
+
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(6.dp))
-        Text("Your checklist is stored locally on this device.")
+        Text("Your safety information is stored locally on this device.")
         Spacer(Modifier.height(16.dp))
+
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Emergency Contact", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                if (state.emergencyContactName.isBlank()) {
+                    Text("Add a trusted person you can contact quickly.")
+                    Spacer(Modifier.height(10.dp))
+                    Button(onClick = { showContactForm = true }) { Text("Add contact") }
+                } else {
+                    Text(state.emergencyContactName, style = MaterialTheme.typography.titleMedium)
+                    Text(state.emergencyContactPhone)
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            val phone = Uri.encode(state.emergencyContactPhone)
+                            context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+                        }) { Text("Call") }
+                        OutlinedButton(onClick = { showContactForm = true }) { Text("Edit") }
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        if (showContactForm) {
+            AlertDialog(
+                onDismissRequest = { showContactForm = false },
+                title = { Text("Emergency Contact") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(value = contactName, onValueChange = { contactName = it }, label = { Text("Name") }, singleLine = true)
+                        OutlinedTextField(value = contactPhone, onValueChange = { contactPhone = it }, label = { Text("Phone number") }, singleLine = true)
+                    }
+                },
+                confirmButton = {
+                    Button(enabled = contactName.isNotBlank() && contactPhone.isNotBlank(), onClick = {
+                        state = state.copy(emergencyContactName = contactName.trim(), emergencyContactPhone = contactPhone.trim())
+                        repository.save(state)
+                        showContactForm = false
+                    }) { Text("Save") }
+                },
+                dismissButton = { OutlinedButton(onClick = { showContactForm = false }) { Text("Cancel") } }
+            )
+        }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             items(checklist.indices.toList()) { index ->
