@@ -142,21 +142,29 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
 
 @Composable
 private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
-    val categories = listOf("All") + stories.map { it.category }.distinct()
+    val context = LocalContext.current
+    val repository = remember(context) { SafetyRepository(context) }
+    var userStories by remember { mutableStateOf(repository.load().userStories.mapNotNull(::decodeStory)) }
+    val allStories = stories + userStories
+    val categories = listOf("All") + allStories.map { it.category }.distinct()
     var selectedCategory by remember { mutableStateOf("All") }
-    val filteredStories = if (selectedCategory == "All") stories else stories.filter { it.category == selectedCategory }
+    var showCreate by remember { mutableStateOf(false) }
+    var title by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("Community") }
+    var summary by remember { mutableStateOf("") }
+    var body by remember { mutableStateOf("") }
+    val filteredStories = if (selectedCategory == "All") allStories else allStories.filter { it.category == selectedCategory }
 
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Community Stories", style = MaterialTheme.typography.headlineMedium)
-        Text("Explore stories and cultural knowledge.")
+        Text("Explore and preserve community knowledge.")
+        Spacer(Modifier.height(12.dp))
+        Button(onClick = { showCreate = true }) { Text("Create a story") }
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            categories.forEach { category ->
-                if (category == selectedCategory) {
-                    Button(onClick = { selectedCategory = category }) { Text(category) }
-                } else {
-                    OutlinedButton(onClick = { selectedCategory = category }) { Text(category) }
-                }
+            categories.forEach { current ->
+                if (current == selectedCategory) Button(onClick = { selectedCategory = current }) { Text(current) }
+                else OutlinedButton(onClick = { selectedCategory = current }) { Text(current) }
             }
         }
         Spacer(Modifier.height(12.dp))
@@ -176,7 +184,46 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
             item { Button(onClick = onBack) { Text("Back") } }
         }
     }
+
+    if (showCreate) {
+        AlertDialog(
+            onDismissRequest = { showCreate = false },
+            title = { Text("Create Community Story") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(title, { title = it }, label = { Text("Title") }, singleLine = true)
+                    OutlinedTextField(category, { category = it }, label = { Text("Category") }, singleLine = true)
+                    OutlinedTextField(summary, { summary = it }, label = { Text("Short summary") })
+                    OutlinedTextField(body, { body = it }, label = { Text("Story") }, minLines = 4)
+                }
+            },
+            confirmButton = {
+                Button(
+                    enabled = title.isNotBlank() && category.isNotBlank() && body.isNotBlank(),
+                    onClick = {
+                        val story = Story(title.trim(), category.trim(), summary.trim(), body.trim())
+                        val json = org.json.JSONObject().apply {
+                            put("title", story.title)
+                            put("category", story.category)
+                            put("summary", story.summary)
+                            put("body", story.body)
+                        }.toString()
+                        val state = repository.load()
+                        repository.save(state.copy(userStories = state.userStories + json))
+                        userStories = userStories + story
+                        title = ""
+                        category = "Community"
+                        summary = ""
+                        body = ""
+                        showCreate = false
+                    }
+                ) { Text("Publish") }
+            },
+            dismissButton = { OutlinedButton(onClick = { showCreate = false }) { Text("Cancel") } }
+        )
+    }
 }
+
 @Composable
 private fun ProfileScreen(state: SafetyState, onSave: (String, String) -> Unit, onBack: () -> Unit) {
     var name by remember(state.profileName) { mutableStateOf(state.profileName) }
