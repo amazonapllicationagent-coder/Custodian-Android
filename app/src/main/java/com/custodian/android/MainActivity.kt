@@ -95,6 +95,7 @@ private fun CustodianApp() {
     val context = LocalContext.current
     val repository = remember(context) { SafetyRepository(context) }
     var profileState by remember { mutableStateOf(repository.load()) }
+    LaunchedEffect(screen) { profileState = repository.load() }
 
     val custodianColors = lightColorScheme(
         primary = androidx.compose.ui.graphics.Color(0xFF1B5E20),
