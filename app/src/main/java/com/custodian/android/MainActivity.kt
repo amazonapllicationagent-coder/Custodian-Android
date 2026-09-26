@@ -129,6 +129,12 @@ private fun CustodianApp() {
                             label = { Text("Safety") }
                         )
                         NavigationBarItem(
+                            selected = screen == "settings",
+                            onClick = { screen = "settings" },
+                            icon = { Text("⚙") },
+                            label = { Text("Settings") }
+                        )
+                        NavigationBarItem(
                             selected = screen == "profile",
                             onClick = { screen = "profile" },
                             icon = { Text("●") },
