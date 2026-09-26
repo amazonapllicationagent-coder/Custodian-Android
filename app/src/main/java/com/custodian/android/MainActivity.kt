@@ -45,10 +45,7 @@ private fun CustodianApp() {
 
 @Composable
 private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
-    Column(
-        Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
+    Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center) {
         Text("CUSTODIAN", style = MaterialTheme.typography.headlineLarge)
         Text("Our stories. Our wisdom. Our future.")
         Spacer(Modifier.height(24.dp))
@@ -105,7 +102,8 @@ private fun StoryDetailScreen(onBack: () -> Unit) {
 
 @Composable
 private fun SafetyScreen(onBack: () -> Unit) {
-    var checkedItems by remember { mutableStateOf(setOf<Int>()) }
+    val repository = remember { SafetyRepository(LocalContext.current) }
+    var state by remember { mutableStateOf(repository.load()) }
     val checklist = listOf(
         "Keep important family contacts available",
         "Agree on a family meeting point",
@@ -116,7 +114,7 @@ private fun SafetyScreen(onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(6.dp))
-        Text("A simple private safety checklist. No location tracking or monitoring is enabled.")
+        Text("Your checklist is stored locally on this device.")
         Spacer(Modifier.height(16.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -128,9 +126,15 @@ private fun SafetyScreen(onBack: () -> Unit) {
                     ) {
                         Text(checklist[index], Modifier.weight(1f).padding(end = 8.dp))
                         Checkbox(
-                            checked = index in checkedItems,
+                            checked = index in state.completedSteps,
                             onCheckedChange = { checked ->
-                                checkedItems = if (checked) checkedItems + index else checkedItems - index
+                                val completed = if (checked) {
+                                    state.completedSteps + index
+                                } else {
+                                    state.completedSteps - index
+                                }
+                                state = state.copy(completedSteps = completed)
+                                repository.save(state)
                             }
                         )
                     }
@@ -139,7 +143,7 @@ private fun SafetyScreen(onBack: () -> Unit) {
             item {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "${checkedItems.size} of ${checklist.size} safety steps completed",
+                    "${state.completedSteps.size} of ${checklist.size} safety steps completed",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(Modifier.height(12.dp))
