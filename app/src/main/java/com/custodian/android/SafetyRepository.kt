@@ -7,7 +7,8 @@ import org.json.JSONObject
 data class SafetyState(
     val completedSteps: Set<Int> = emptySet(),
     val emergencyContactName: String = "",
-    val emergencyContactPhone: String = ""
+    val emergencyContactPhone: String = "",
+    val lastCheckIn: String = ""
 )
 
 class SafetyRepository(context: Context) {
@@ -21,7 +22,8 @@ class SafetyRepository(context: Context) {
         return SafetyState(
             completedSteps = completed,
             emergencyContactName = preferences.getString("contact_name", "") ?: "",
-            emergencyContactPhone = preferences.getString("contact_phone", "") ?: ""
+            emergencyContactPhone = preferences.getString("contact_phone", "") ?: "",
+            lastCheckIn = preferences.getString("last_check_in", "") ?: ""
         )
     }
 
@@ -33,6 +35,7 @@ class SafetyRepository(context: Context) {
             .putString("completed_steps", array.toString())
             .putString("contact_name", state.emergencyContactName)
             .putString("contact_phone", state.emergencyContactPhone)
+            .putString("last_check_in", state.lastCheckIn)
             .apply()
     }
 }
