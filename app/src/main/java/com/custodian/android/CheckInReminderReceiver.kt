@@ -3,15 +3,23 @@ package com.custodian.android
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 
 class CheckInReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&\n            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED\n        ) {\n            return\n        }\n\n        val channelId = "custodian_checkin"
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        val channelId = "custodian_checkin"
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             manager.createNotificationChannel(
@@ -37,6 +45,7 @@ class CheckInReminderReceiver : BroadcastReceiver() {
         } else {
             Notification.Builder(context)
         }
+
         val notification = notificationBuilder
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("Custodian check-in")
