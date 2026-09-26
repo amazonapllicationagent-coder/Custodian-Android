@@ -18,12 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
-private data class Story(val title: String, val category: String, val summary: String)
+private data class Story(val title: String, val category: String, val summary: String, val body: String)
 
 private val stories = listOf(
-    Story("The Village Elder", "Culture", "A community story about wisdom, responsibility, and protecting tradition."),
-    Story("The Lost Path", "Community", "A family discovers why listening to elders can prevent a difficult journey."),
-    Story("Our Heritage", "Tradition", "A simple introduction to preserving language, customs, and family history.")
+    Story("The Village Elder", "Culture", "A community story about wisdom, responsibility, and protecting tradition.", "At the heart of the village stood an elder who believed that knowledge was strongest when it was shared. Families gathered to listen, ask questions, and remember the lessons of those who came before them."),
+    Story("The Lost Path", "Community", "A family discovers why listening to elders can prevent a difficult journey.", "A young family set out on an unfamiliar path and soon realized that the road was difficult. An older relative remembered a safer route and guided them back. The experience taught the family the value of patience, experience, and communication."),
+    Story("Our Heritage", "Tradition", "A simple introduction to preserving language, customs, and family history.", "Young people began recording the words, songs, recipes, and memories shared by their grandparents. They discovered that heritage can be carried forward through everyday conversations and respectful storytelling.")
 )
 
 class MainActivity : ComponentActivity() {
@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun CustodianApp() {
     var screen by remember { mutableStateOf("home") }
+    var selectedStory by remember { mutableStateOf(stories.first()) }
 
     MaterialTheme {
         Scaffold(
@@ -66,8 +67,8 @@ private fun CustodianApp() {
         ) { padding ->
             Surface(Modifier.fillMaxSize().padding(padding)) {
                 when (screen) {
-                    "stories" -> StoriesScreen({ screen = "home" }) { screen = "storyDetail" }
-                    "storyDetail" -> StoryDetailScreen { screen = "stories" }
+                    "stories" -> StoriesScreen({ screen = "home" }) { story -> selectedStory = story; screen = "storyDetail" }
+                    "storyDetail" -> StoryDetailScreen(selectedStory) { screen = "stories" }
                     "safety" -> SafetyScreen { screen = "home" }
                     else -> HomeScreen({ screen = "stories" }, { screen = "safety" })
                 }
@@ -127,7 +128,7 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
 }
 
 @Composable
-private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
+private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
     val storyTitleStyle = MaterialTheme.typography.titleLarge
     val storyCategoryStyle = MaterialTheme.typography.labelMedium
 
@@ -144,7 +145,7 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
                         Spacer(Modifier.height(6.dp))
                         Text(story.summary)
                         Spacer(Modifier.height(10.dp))
-                        OutlinedButton(onClick = onStory) { Text("Read story") }
+                        OutlinedButton(onClick = { onStory(story) }) { Text("Read story") }
                     }
                 }
             }
@@ -154,12 +155,14 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
 }
 
 @Composable
-private fun StoryDetailScreen(onBack: () -> Unit) {
+private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp)) {
-        Text("The Village Elder", style = MaterialTheme.typography.headlineMedium)
-        Text("Culture • Community")
+        Text(story.title, style = MaterialTheme.typography.headlineMedium)
+        Text("${story.category} • Custodian Stories")
         Spacer(Modifier.height(20.dp))
-        Text("Every community carries knowledge from one generation to the next. This story space will eventually contain full chapters, audio, images, and creator information.")
+        Text(story.summary, style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(16.dp))
+        Text(story.body, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(24.dp))
         Button(onClick = onBack) { Text("Back to stories") }
     }
