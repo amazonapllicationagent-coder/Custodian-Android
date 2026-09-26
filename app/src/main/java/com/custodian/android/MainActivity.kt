@@ -266,7 +266,7 @@ private fun SettingsScreen(state: SafetyState, onBack: () -> Unit) {
                 Spacer(Modifier.height(6.dp))
                 Text("Community stories, cultural knowledge, and family safety.")
                 Spacer(Modifier.height(4.dp))
-                Text("Version 0.2.0", style = MaterialTheme.typography.labelMedium)
+                Text("Version 0.3.0", style = MaterialTheme.typography.labelMedium)
                 Text("Safety information is stored locally on this device.", style = MaterialTheme.typography.labelMedium)
             }
         }
