@@ -101,6 +101,9 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
 
 @Composable
 private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
+    val storyTitleStyle = MaterialTheme.typography.titleLarge
+    val storyCategoryStyle = MaterialTheme.typography.labelMedium
+
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Community Stories", style = MaterialTheme.typography.headlineMedium)
         Text("Explore stories and cultural knowledge.")
@@ -109,8 +112,8 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
             items(stories) { story ->
                 Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
                     Column(Modifier.padding(16.dp)) {
-                        Text(story.title, style = MaterialTheme.typography.titleLarge)
-                        Text(story.category, style = MaterialTheme.typography.labelMedium)
+                        Text(story.title, style = storyTitleStyle)
+                        Text(story.category, style = storyCategoryStyle)
                         Spacer(Modifier.height(6.dp))
                         Text(story.summary)
                         Spacer(Modifier.height(10.dp))
