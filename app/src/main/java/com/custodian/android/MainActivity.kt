@@ -510,7 +510,7 @@ private fun SafetyScreen(onBack: () -> Unit) {
                                 type = "text/plain"
                                 putExtra(Intent.EXTRA_TEXT, message)
                             }
-                            context.startActivity(Intent.createChooser(intent, "Share check-in"))
+                            if (intent.resolveActivity(context.packageManager) != null) { context.startActivity(Intent.createChooser(intent, "Share check-in")) }
                         }) { Text("Share") }
                     }
                 }
