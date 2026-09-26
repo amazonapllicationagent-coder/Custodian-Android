@@ -129,19 +129,30 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
 
 @Composable
 private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
-    val storyTitleStyle = MaterialTheme.typography.titleLarge
-    val storyCategoryStyle = MaterialTheme.typography.labelMedium
+    val categories = listOf("All") + stories.map { it.category }.distinct()
+    var selectedCategory by remember { mutableStateOf("All") }
+    val filteredStories = if (selectedCategory == "All") stories else stories.filter { it.category == selectedCategory }
 
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Community Stories", style = MaterialTheme.typography.headlineMedium)
         Text("Explore stories and cultural knowledge.")
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            categories.forEach { category ->
+                if (category == selectedCategory) {
+                    Button(onClick = { selectedCategory = category }) { Text(category) }
+                } else {
+                    OutlinedButton(onClick = { selectedCategory = category }) { Text(category) }
+                }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(stories) { story ->
+            items(filteredStories) { story ->
                 Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
                     Column(Modifier.padding(16.dp)) {
-                        Text(story.title, style = storyTitleStyle)
-                        Text(story.category, style = storyCategoryStyle)
+                        Text(story.title, style = MaterialTheme.typography.titleLarge)
+                        Text(story.category, style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(6.dp))
                         Text(story.summary)
                         Spacer(Modifier.height(10.dp))
@@ -153,7 +164,6 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
         }
     }
 }
-
 @Composable
 private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp)) {
