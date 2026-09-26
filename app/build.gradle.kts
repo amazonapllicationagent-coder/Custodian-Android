@@ -4,6 +4,17 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val signingStoreFile = providers.gradleProperty("CUSTODIAN_STORE_FILE").orNull
+val signingStorePassword = providers.gradleProperty("CUSTODIAN_STORE_PASSWORD").orNull
+val signingKeyAlias = providers.gradleProperty("CUSTODIAN_KEY_ALIAS").orNull
+val signingKeyPassword = providers.gradleProperty("CUSTODIAN_KEY_PASSWORD").orNull
+val signingConfigured = listOf(
+    signingStoreFile,
+    signingStorePassword,
+    signingKeyAlias,
+    signingKeyPassword
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.custodian.android"
     compileSdk = 35
@@ -14,7 +25,27 @@ android {
         versionCode = 2
         versionName = "0.3.0"
     }
-    buildTypes { release { isMinifyEnabled = false } }
+
+    if (signingConfigured) {
+        signingConfigs {
+            create("custodianRelease") {
+                storeFile = file(signingStoreFile!!)
+                storePassword = signingStorePassword
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            if (signingConfigured) {
+                signingConfig = signingConfigs.getByName("custodianRelease")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
