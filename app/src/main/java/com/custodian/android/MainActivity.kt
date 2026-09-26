@@ -590,7 +590,7 @@ private fun SafetyScreen(onBack: () -> Unit) {
                 title = { Text("Emergency Contact") },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        OutlinedTextField(value = contactName, onValueChange = { contactName = it }, label = { Text("Name") }, singleLine = true)
+                        OutlinedTextField(value = contactName, onValueChange = { contactName = it.take(80) }, label = { Text("Name") }, singleLine = true)
                         OutlinedTextField(value = contactPhone, onValueChange = { value -> contactPhone = value.filter { it.isDigit() || it == '+' || it == ' ' || it == '-' }.take(20) }, label = { Text("Phone number") }, singleLine = true)
                     }
                 },
