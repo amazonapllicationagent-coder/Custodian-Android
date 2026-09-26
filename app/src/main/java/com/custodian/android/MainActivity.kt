@@ -166,6 +166,10 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
 }
 @Composable
 private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val repository = remember(context) { SafetyRepository(context) }
+    var saved by remember(story.title) { mutableStateOf(story.title in repository.load().savedStories) }
+
     Column(Modifier.fillMaxSize().padding(24.dp)) {
         Text(story.title, style = MaterialTheme.typography.headlineMedium)
         Text("${story.category} • Custodian Stories")
@@ -174,10 +178,18 @@ private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Text(story.body, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onBack) { Text("Back to stories") }
+        Button(onClick = {
+            val state = repository.load()
+            val updated = if (saved) state.savedStories - story.title else state.savedStories + story.title
+            repository.save(state.copy(savedStories = updated))
+            saved = !saved
+        }) {
+            Text(if (saved) "Saved ✓" else "Save story")
+        }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = onBack) { Text("Back to stories") }
     }
 }
-
 @Composable
 private fun SafetyScreen(onBack: () -> Unit) {
     val context = LocalContext.current
