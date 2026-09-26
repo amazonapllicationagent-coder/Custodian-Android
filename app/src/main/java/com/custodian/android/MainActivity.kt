@@ -590,11 +590,11 @@ private fun SafetyScreen(onBack: () -> Unit) {
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         OutlinedTextField(value = contactName, onValueChange = { contactName = it }, label = { Text("Name") }, singleLine = true)
-                        OutlinedTextField(value = contactPhone, onValueChange = { contactPhone = it }, label = { Text("Phone number") }, singleLine = true)
+                        OutlinedTextField(value = contactPhone, onValueChange = { value -> contactPhone = value.filter { it.isDigit() || it == '+' || it == ' ' || it == '-' }.take(20) }, label = { Text("Phone number") }, singleLine = true)
                     }
                 },
                 confirmButton = {
-                    Button(enabled = contactName.isNotBlank() && contactPhone.isNotBlank(), onClick = {
+                    Button(enabled = contactName.isNotBlank() && contactPhone.filter { it.isDigit() }.length >= 7, onClick = {
                         state = state.copy(emergencyContactName = contactName.trim(), emergencyContactPhone = contactPhone.trim())
                         repository.save(state)
                         showContactForm = false
