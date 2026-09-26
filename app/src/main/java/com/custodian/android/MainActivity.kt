@@ -153,7 +153,6 @@ private fun SafetyScreen(onBack: () -> Unit) {
     var showContactForm by remember { mutableStateOf(false) }
     var contactName by remember { mutableStateOf(state.emergencyContactName) }
     var contactPhone by remember { mutableStateOf(state.emergencyContactPhone) }
-    val context = LocalContext.current
 
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
