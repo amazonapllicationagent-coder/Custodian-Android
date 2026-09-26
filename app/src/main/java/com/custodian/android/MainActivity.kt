@@ -38,12 +38,39 @@ private fun CustodianApp() {
     var screen by remember { mutableStateOf("home") }
 
     MaterialTheme {
-        Surface(Modifier.fillMaxSize()) {
-            when (screen) {
-                "stories" -> StoriesScreen({ screen = "home" }) { screen = "storyDetail" }
-                "storyDetail" -> StoryDetailScreen { screen = "stories" }
-                "safety" -> SafetyScreen { screen = "home" }
-                else -> HomeScreen({ screen = "stories" }, { screen = "safety" })
+        Scaffold(
+            bottomBar = {
+                if (screen != "storyDetail") {
+                    NavigationBar {
+                        NavigationBarItem(
+                            selected = screen == "home",
+                            onClick = { screen = "home" },
+                            icon = { Text("⌂") },
+                            label = { Text("Home") }
+                        )
+                        NavigationBarItem(
+                            selected = screen == "stories",
+                            onClick = { screen = "stories" },
+                            icon = { Text("📖") },
+                            label = { Text("Stories") }
+                        )
+                        NavigationBarItem(
+                            selected = screen == "safety",
+                            onClick = { screen = "safety" },
+                            icon = { Text("✓") },
+                            label = { Text("Safety") }
+                        )
+                    }
+                }
+            }
+        ) { padding ->
+            Surface(Modifier.fillMaxSize().padding(padding)) {
+                when (screen) {
+                    "stories" -> StoriesScreen({ screen = "home" }) { screen = "storyDetail" }
+                    "storyDetail" -> StoryDetailScreen { screen = "stories" }
+                    "safety" -> SafetyScreen { screen = "home" }
+                    else -> HomeScreen({ screen = "stories" }, { screen = "safety" })
+                }
             }
         }
     }
