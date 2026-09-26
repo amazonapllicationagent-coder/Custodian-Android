@@ -4,10 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -33,16 +34,10 @@ private fun CustodianApp() {
     MaterialTheme {
         Surface(Modifier.fillMaxSize()) {
             when (screen) {
-                "stories" -> StoriesScreen(
-                    onBack = { screen = "home" },
-                    onStory = { screen = "storyDetail" }
-                )
-                "storyDetail" -> StoryDetailScreen(onBack = { screen = "stories" })
-                "safety" -> SafetyScreen(onBack = { screen = "home" })
-                else -> HomeScreen(
-                    onStories = { screen = "stories" },
-                    onSafety = { screen = "safety" }
-                )
+                "stories" -> StoriesScreen({ screen = "home" }) { screen = "storyDetail" }
+                "storyDetail" -> StoryDetailScreen { screen = "stories" }
+                "safety" -> SafetyScreen { screen = "home" }
+                else -> HomeScreen({ screen = "stories" }, { screen = "safety" })
             }
         }
     }
@@ -52,14 +47,11 @@ private fun CustodianApp() {
 private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
     Column(
         Modifier.fillMaxSize().padding(24.dp),
-        Arrangement.Center,
-        Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.Center
     ) {
         Text("CUSTODIAN", style = MaterialTheme.typography.headlineLarge)
-        Spacer(Modifier.height(8.dp))
         Text("Our stories. Our wisdom. Our future.")
         Spacer(Modifier.height(24.dp))
-
         Card(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp)) {
             Column(Modifier.padding(20.dp)) {
                 Text("Welcome", style = MaterialTheme.typography.titleLarge)
@@ -67,7 +59,6 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
                 Text("Discover community stories, preserve cultural knowledge, and access family safety tools.")
             }
         }
-
         Spacer(Modifier.height(20.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(onClick = onStories) { Text("Stories") }
@@ -80,27 +71,23 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
 private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Community Stories", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(6.dp))
         Text("Explore stories and cultural knowledge.")
         Spacer(Modifier.height(16.dp))
-
-        stories.forEach { story ->
-            Card(
-                Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                RoundedCornerShape(16.dp)
-            ) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(story.title, style = MaterialTheme.typography.titleLarge)
-                    Text(story.category, style = MaterialTheme.typography.labelMedium)
-                    Spacer(Modifier.height(6.dp))
-                    Text(story.summary)
-                    Spacer(Modifier.height(10.dp))
-                    OutlinedButton(onClick = onStory) { Text("Read story") }
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(stories) { story ->
+                Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(story.title, style = MaterialTheme.typography.titleLarge)
+                        Text(story.category, style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(6.dp))
+                        Text(story.summary)
+                        Spacer(Modifier.height(10.dp))
+                        OutlinedButton(onClick = onStory) { Text("Read story") }
+                    }
                 }
             }
+            item { Button(onClick = onBack) { Text("Back") } }
         }
-
-        Button(onClick = onBack) { Text("Back") }
     }
 }
 
@@ -108,14 +95,9 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
 private fun StoryDetailScreen(onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp)) {
         Text("The Village Elder", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(8.dp))
         Text("Culture • Community")
         Spacer(Modifier.height(20.dp))
-        Text(
-            "Every community carries knowledge from one generation to the next. " +
-                "This story space will eventually contain full chapters, audio, images, " +
-                "and creator information."
-        )
+        Text("Every community carries knowledge from one generation to the next. This story space will eventually contain full chapters, audio, images, and creator information.")
         Spacer(Modifier.height(24.dp))
         Button(onClick = onBack) { Text("Back to stories") }
     }
@@ -123,11 +105,46 @@ private fun StoryDetailScreen(onBack: () -> Unit) {
 
 @Composable
 private fun SafetyScreen(onBack: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(24.dp)) {
+    var checkedItems by remember { mutableStateOf(setOf<Int>()) }
+    val checklist = listOf(
+        "Keep important family contacts available",
+        "Agree on a family meeting point",
+        "Keep emergency information accessible",
+        "Check that children know who they can ask for help"
+    )
+
+    Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        Text("Safety features will be added here with privacy, permissions, and user control at the center.")
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = onBack) { Text("Back") }
+        Spacer(Modifier.height(6.dp))
+        Text("A simple private safety checklist. No location tracking or monitoring is enabled.")
+        Spacer(Modifier.height(16.dp))
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            items(checklist.indices.toList()) { index ->
+                Card(Modifier.fillMaxWidth(), RoundedCornerShape(14.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(checklist[index], Modifier.weight(1f).padding(end = 8.dp))
+                        Checkbox(
+                            checked = index in checkedItems,
+                            onCheckedChange = { checked ->
+                                checkedItems = if (checked) checkedItems + index else checkedItems - index
+                            }
+                        )
+                    }
+                }
+            }
+            item {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "${checkedItems.size} of ${checklist.size} safety steps completed",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = onBack) { Text("Back") }
+            }
+        }
     }
 }
