@@ -37,6 +37,9 @@ class MainActivity : ComponentActivity() {
 private fun CustodianApp() {
     var screen by remember { mutableStateOf("home") }
     var selectedStory by remember { mutableStateOf(stories.first()) }
+    val context = LocalContext.current
+    val repository = remember(context) { SafetyRepository(context) }
+    var profileState by remember { mutableStateOf(repository.load()) }
 
     MaterialTheme {
         Scaffold(
@@ -61,6 +64,12 @@ private fun CustodianApp() {
                             icon = { Text("✓") },
                             label = { Text("Safety") }
                         )
+                        NavigationBarItem(
+                            selected = screen == "profile",
+                            onClick = { screen = "profile" },
+                            icon = { Text("●") },
+                            label = { Text("Profile") }
+                        )
                     }
                 }
             }
@@ -70,6 +79,10 @@ private fun CustodianApp() {
                     "stories" -> StoriesScreen({ screen = "home" }) { story -> selectedStory = story; screen = "storyDetail" }
                     "storyDetail" -> StoryDetailScreen(selectedStory) { screen = "stories" }
                     "safety" -> SafetyScreen { screen = "home" }
+                    "profile" -> ProfileScreen(profileState, { name, about ->
+                        profileState = profileState.copy(profileName = name, profileAbout = about)
+                        repository.save(profileState)
+                    }) { screen = "home" }
                     else -> HomeScreen({ screen = "stories" }, { screen = "safety" })
                 }
             }
@@ -164,6 +177,31 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
         }
     }
 }
+@Composable
+private fun ProfileScreen(state: SafetyState, onSave: (String, String) -> Unit, onBack: () -> Unit) {
+    var name by remember(state.profileName) { mutableStateOf(state.profileName) }
+    var about by remember(state.profileAbout) { mutableStateOf(state.profileAbout) }
+
+    Column(Modifier.fillMaxSize().padding(20.dp)) {
+        Text("My Profile", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(16.dp))
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(18.dp)) {
+            Column(Modifier.padding(18.dp)) {
+                Text(if (name.isBlank()) "Welcome to Custodian" else name, style = MaterialTheme.typography.titleLarge)
+                Text(if (about.isBlank()) "Tell the community a little about yourself." else about)
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        OutlinedTextField(name, { name = it }, label = { Text("Your name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        Spacer(Modifier.height(10.dp))
+        OutlinedTextField(about, { about = it }, label = { Text("About you") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = { onSave(name.trim(), about.trim()) }, modifier = Modifier.fillMaxWidth()) { Text("Save profile") }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Back") }
+    }
+}
+
 @Composable
 private fun StoryDetailScreen(story: Story, onBack: () -> Unit) {
     val context = LocalContext.current
