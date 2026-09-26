@@ -51,21 +51,50 @@ private fun CustodianApp() {
 
 @Composable
 private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center) {
+    Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("CUSTODIAN", style = MaterialTheme.typography.headlineLarge)
         Text("Our stories. Our wisdom. Our future.")
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
+
         Card(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp)) {
             Column(Modifier.padding(20.dp)) {
-                Text("Welcome", style = MaterialTheme.typography.titleLarge)
-                Spacer(Modifier.height(8.dp))
-                Text("Discover community stories, preserve cultural knowledge, and access family safety tools.")
+                Text("Welcome home", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                Text("Your place for community stories, cultural knowledge, and family safety.")
             }
         }
-        Spacer(Modifier.height(20.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onStories) { Text("Stories") }
-            OutlinedButton(onClick = onSafety) { Text("Safety") }
+
+        Spacer(Modifier.height(16.dp))
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            item {
+                Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Community Stories", style = MaterialTheme.typography.titleLarge)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Read stories and preserve knowledge from one generation to the next.")
+                        Spacer(Modifier.height(10.dp))
+                        Button(onClick = onStories) { Text("Explore stories") }
+                    }
+                }
+            }
+            item {
+                Card(Modifier.fillMaxWidth(), RoundedCornerShape(16.dp)) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Family Safety", style = MaterialTheme.typography.titleLarge)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Check in, manage your trusted contact, and complete your safety checklist.")
+                        Spacer(Modifier.height(10.dp))
+                        OutlinedButton(onClick = onSafety) { Text("Open safety center") }
+                    }
+                }
+            }
+            item {
+                Text(
+                    "Privacy first • Your safety information stays on this device.",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         }
     }
 }
