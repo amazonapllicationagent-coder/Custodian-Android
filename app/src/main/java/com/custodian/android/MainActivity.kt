@@ -3,25 +3,21 @@ package com.custodian.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+
+private data class Story(val title: String, val category: String, val summary: String)
+
+private val stories = listOf(
+    Story("The Village Elder", "Culture", "A community story about wisdom, responsibility, and protecting tradition."),
+    Story("The Lost Path", "Community", "A family discovers why listening to elders can prevent a difficult journey."),
+    Story("Our Heritage", "Tradition", "A simple introduction to preserving language, customs, and family history.")
+)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +33,11 @@ private fun CustodianApp() {
     MaterialTheme {
         Surface(Modifier.fillMaxSize()) {
             when (screen) {
-                "stories" -> StoriesScreen(onBack = { screen = "home" })
+                "stories" -> StoriesScreen(
+                    onBack = { screen = "home" },
+                    onStory = { screen = "storyDetail" }
+                )
+                "storyDetail" -> StoryDetailScreen(onBack = { screen = "stories" })
                 "safety" -> SafetyScreen(onBack = { screen = "home" })
                 else -> HomeScreen(
                     onStories = { screen = "stories" },
@@ -51,20 +51,20 @@ private fun CustodianApp() {
 @Composable
 private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        Modifier.fillMaxSize().padding(24.dp),
+        Arrangement.Center,
+        Alignment.CenterHorizontally
     ) {
         Text("CUSTODIAN", style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(8.dp))
         Text("Our stories. Our wisdom. Our future.")
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(24.dp))
 
-        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+        Card(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp)) {
             Column(Modifier.padding(20.dp)) {
                 Text("Welcome", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
-                Text("A trusted place for community stories, family safety, and cultural knowledge.")
+                Text("Discover community stories, preserve cultural knowledge, and access family safety tools.")
             }
         }
 
@@ -77,13 +77,47 @@ private fun HomeScreen(onStories: () -> Unit, onSafety: () -> Unit) {
 }
 
 @Composable
-private fun StoriesScreen(onBack: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(24.dp)) {
+private fun StoriesScreen(onBack: () -> Unit, onStory: () -> Unit) {
+    Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("Community Stories", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        Text("Stories and cultural knowledge can be organized here as the app grows.")
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(6.dp))
+        Text("Explore stories and cultural knowledge.")
+        Spacer(Modifier.height(16.dp))
+
+        stories.forEach { story ->
+            Card(
+                Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                RoundedCornerShape(16.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(story.title, style = MaterialTheme.typography.titleLarge)
+                    Text(story.category, style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.height(6.dp))
+                    Text(story.summary)
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(onClick = onStory) { Text("Read story") }
+                }
+            }
+        }
+
         Button(onClick = onBack) { Text("Back") }
+    }
+}
+
+@Composable
+private fun StoryDetailScreen(onBack: () -> Unit) {
+    Column(Modifier.fillMaxSize().padding(24.dp)) {
+        Text("The Village Elder", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(8.dp))
+        Text("Culture • Community")
+        Spacer(Modifier.height(20.dp))
+        Text(
+            "Every community carries knowledge from one generation to the next. " +
+                "This story space will eventually contain full chapters, audio, images, " +
+                "and creator information."
+        )
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = onBack) { Text("Back to stories") }
     }
 }
 
@@ -92,7 +126,7 @@ private fun SafetyScreen(onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp)) {
         Text("Family Safety", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(12.dp))
-        Text("Safety tools will be added here, with privacy and user control built in.")
+        Text("Safety features will be added here with privacy, permissions, and user control at the center.")
         Spacer(Modifier.height(24.dp))
         Button(onClick = onBack) { Text("Back") }
     }
