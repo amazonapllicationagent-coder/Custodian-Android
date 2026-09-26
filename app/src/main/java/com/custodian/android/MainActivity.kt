@@ -206,7 +206,7 @@ private fun StoriesScreen(onBack: () -> Unit, onStory: (Story) -> Unit) {
     var searchQuery by remember { mutableStateOf("") }
     var showCreate by remember { mutableStateOf(false) }
     var savedOnly by remember { mutableStateOf(false) }
-    val savedTitles = remember { repository.load().savedStories }
+    val savedTitles = repository.load().savedStories
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("Community") }
     var summary by remember { mutableStateOf("") }
