@@ -1,7 +1,5 @@
 package com.custodian.android
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,8 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-private const val ACCOUNT_URL = "https://custodian-3ywy7w.v2.appdeploy.ai/"
-
 data class RootMember(val name: String, val relationship: String, val community: String)
 data class ElderStory(val elder: String, val title: String, val community: String)
 
@@ -41,10 +37,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { CustodianApp() }
-    }
-
-    private fun openAccountPortal() {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ACCOUNT_URL)))
     }
 
     @Composable
@@ -57,8 +49,7 @@ class MainActivity : ComponentActivity() {
         MaterialTheme {
             if (!signedIn) {
                 WelcomeScreen(
-                    onCreateAccount = { openAccountPortal() },
-                    onContinue = { signedIn = true }
+                    onCreateAccount = { signedIn = true }
                 )
                 return@MaterialTheme
             }
@@ -130,7 +121,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { /* Explore is handled by the navigation tabs. */ }, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = { selected = 1 }, modifier = Modifier.fillMaxWidth()) {
             Text("Explore my roots")
         }
         Spacer(Modifier.height(8.dp))
