@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)
                 ) {
                     when (selected) {
-                        0 -> Dashboard(onSignOut = { signedIn = false })
+                        0 -> Dashboard(onExplore = { selected = 1 }, onSignOut = { signedIn = false })
                         1 -> FamilyScreen(roots)
                         2 -> EldersScreen(stories)
                         3 -> TimelineScreen()
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun WelcomeScreen(onCreateAccount: () -> Unit, onContinue: () -> Unit) {
+    private fun WelcomeScreen(onCreateAccount: () -> Unit) {
         Column(
             modifier = Modifier.fillMaxSize().padding(24.dp),
             verticalArrangement = Arrangement.Center
@@ -99,17 +99,13 @@ class MainActivity : ComponentActivity() {
             Button(onClick = onCreateAccount, modifier = Modifier.fillMaxWidth()) {
                 Text("Create account / Sign in")
             }
-            Spacer(Modifier.height(10.dp))
-            OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
-                Text("Open Custodian")
-            }
             Spacer(Modifier.height(12.dp))
             Text("Your account is managed securely through Custodian.")
         }
     }
 
     @Composable
-    private fun Dashboard(onSignOut: () -> Unit) {
+    private fun Dashboard(onExplore: () -> Unit, onSignOut: () -> Unit) {
         Text("Custodian", style = MaterialTheme.typography.headlineMedium)
         Text("Your heritage, kept for the next generation.", style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(20.dp))
@@ -121,7 +117,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { selected = 1 }, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = onExplore, modifier = Modifier.fillMaxWidth()) {
             Text("Explore my roots")
         }
         Spacer(Modifier.height(8.dp))
