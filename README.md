@@ -11,3 +11,6 @@ The GitHub Actions workflow runs unit tests and builds both debug and release AP
 ## Current version
 
 Version 0.3.0
+
+
+Android packaging build verification.
