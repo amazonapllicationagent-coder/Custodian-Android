@@ -11,11 +11,13 @@ import androidx.activity.ComponentActivity
 private const val CUSTODIAN_URL = "https://custodian-3ywy7w.v2.appdeploy.ai/"
 
 class MainActivity : ComponentActivity() {
+    private lateinit var webView: WebView
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val webView = WebView(this).apply {
+        webView = WebView(this).apply {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
             settings.javaScriptEnabled = true
@@ -31,7 +33,10 @@ class MainActivity : ComponentActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (this::class.java != MainActivity::class.java) return
-        super.onBackPressed()
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
+        }
     }
 }
