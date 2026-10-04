@@ -237,7 +237,7 @@ class MainActivity : ComponentActivity() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("Welcome, \${name.ifBlank { "Custodian" }}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("Welcome, ${name.ifBlank { "Custodian" }}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Text(
                             community.ifBlank { "Your heritage space" },
                             style = MaterialTheme.typography.bodyMedium,
