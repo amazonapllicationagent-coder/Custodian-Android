@@ -8,6 +8,8 @@
     <application
         android:allowBackup="true"
         android:label="Custodian"
+        android:icon="@drawable/custodian_heritage"
+        android:roundIcon="@drawable/custodian_heritage"
         android:supportsRtl="true"
         android:usesCleartextTraffic="false"
         android:theme="@style/Theme.Custodian">
